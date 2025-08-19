@@ -1,0 +1,256 @@
+
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ribbeplanleggeren</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      color: #111;
+    }
+    body {
+      max-width: 900px;
+      margin: 28px auto;
+      padding: 20px;
+      background: linear-gradient(#b30000, #660000);
+      color: white;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+      color: #fff5e6;
+    }
+    p.lead {
+      color: #ffe6cc;
+      margin-top: 0;
+    }
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 600;
+    }
+    input[type=datetime-local] {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 0;
+      background: #006600;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      background: #fff5e6;
+      color: black;
+    }
+    th, td {
+      padding: 8px 10px;
+      border: 1px solid #e6e6e6;
+      text-align: left;
+    }
+    th {
+      background: #ffcccc;
+    }
+    .note {
+      font-size: 0.9rem;
+      color: #fff5e6;
+      margin-top: 12px;
+      background: #800000;
+      border-left: 4px solid #ffcccc;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .small {
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .footer {
+      margin-top: 18px;
+      font-size: 0.85rem;
+      color: #ffe6cc;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎄 Ribbeplanleggeren 🎄</h1>
+  <p class="lead"> Automatiser din planlegging av ribbesteking denne jula og la Ribbeplanleggeren gjør jobben. Angi når ribba skal være ferdig, så får du en tidslinje og kalenderfil med påminnelser for hvert steg.</p>
+  <p class="lead"> Er Ribbeplanleggeren nyttig for deg?  Ta gjerne kontakt med Ben! - <a href="mailto:bdt@fastmail.com"> bdt@fastmail.com</a> </p>
+
+  <label for="completion">Ønsket ferdig-tid (etter rind popping):</label>
+  <input id="completion" type="datetime-local" />
+
+  <div class="controls">
+    <button id="generate">Generer tidslinje</button>
+    <button id="download" disabled>Last ned .ics</button>
+    <button id="copy" disabled>Kopier tabell som tekst</button>
+  </div>
+
+  <div id="output"></div>
+
+  <div class="note">
+    <strong>Merk:</strong>
+    Steg 1 (2 dagers forberedelse) er alltid inkludert. Alle tider er lokale. Påminnelser i kalenderen skjer nøyaktig når hvert steg starter.
+  </div>
+
+  <div class="footer">God jul og lykke til med ribba! 🎅</div>
+
+  <script>
+    const DURATIONS = {
+      prepHoursBeforeSteaming: 48*60,
+      steaming: 45,
+      slow: {
+        total: 6.5 * 60,
+        parts: [
+          {label: '170°C, ingen vifte', minutes: 60, desc: 'Stek med svor ned, mål ca. 70°C kjernetemp.'},
+          {label: '90°C med vifte', minutes: 4*60, desc: 'Snu ribba svor opp, mål ca. 85°C kjernetemp.'},
+          {label: 'Skru opp til 110°C med vifte', minutes: 60, desc: 'Tilsett grønnsaker, mål ca. 85°C kjernetemp.'},
+          {label: 'Skru opp til 150°C med vifte', minutes: 30, desc: 'Mål ca. 90–92°C kjernetemp.'},
+          {label: 'Skru opp til 210°C med vifte', minutes: 0, desc: 'Følg med for å unngå sviing.'}
+        ]
+      },
+      rindPopping: 5,
+      resting: 10
+    };
+
+    const el = id => document.getElementById(id);
+    const generateBtn = el('generate');
+    const downloadBtn = el('download');
+    const copyBtn = el('copy');
+    const output = el('output');
+    let lastCalendarText = '';
+    let lastCompletionDate = null;
+
+    function pad(n){return String(n).padStart(2,'0')}
+    function fmtLocal(d){return d.toLocaleString(undefined, {dateStyle:'short', timeStyle:'short'});}
+    function formatICSDate(d){return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());}
+
+    function buildTimeline(completionDate){
+      const rindEnd = new Date(completionDate);
+      const rindStart = new Date(rindEnd.getTime() - DURATIONS.rindPopping*60000);
+      const slowRoastEnd = new Date(rindStart);
+      const slowRoastStart = new Date(slowRoastEnd.getTime() - DURATIONS.slow.total*60000);
+      const steamingEnd = new Date(slowRoastStart);
+      const steamingStart = new Date(steamingEnd.getTime() - DURATIONS.steaming*60000);
+      const prepTime = new Date(steamingStart.getTime() - DURATIONS.prepHoursBeforeSteaming*60000);
+
+      let substeps = [];
+      let cursor = new Date(slowRoastStart);
+      for(const part of DURATIONS.slow.parts){
+        const start = new Date(cursor);
+        substeps.push({start, label: part.label, desc: part.desc, duration: part.minutes});
+        cursor = new Date(cursor.getTime() + part.minutes*60000);
+      }
+
+      const steps = [];
+      steps.push({id:1, title:'Steg 1 — Forbered: salt/score (48 timer før damping)', start:prepTime, end:new Date(prepTime.getTime()+60000), desc:'Score svoren, gni med salt/pepper, kjøl 48 timer.'});
+      steps.push({id:2, title:'Steg 2 — Damping / forbered i form', start:steamingStart, end:steamingEnd, desc:'Velg form med ~5 cm klaring. Kok 1.2 L vann med 1 ss salt og øs over svoren for å koagulere. Snu ribba svorside ned i vannet (unngå at den setter seg fast). Finhakk hvitløk og rosmarin og gni inn på kjøttsiden.'});
+        let idx = 3;
+      for(const s of substeps){
+        const end = new Date(s.start.getTime() + (s.duration||0)*60000);
+        steps.push({id: idx++, title: `Steg ${idx-1} — ${s.label}`, start: s.start, end: end, desc: s.desc});
+      }
+
+      steps.push({id: idx++, title:'Rind popping', start:rindStart, end:rindEnd, desc:'250°C i ca. 5 min til sprø svor.'});
+      const restStart = new Date(rindEnd);
+      const restEnd = new Date(restStart.getTime() + DURATIONS.resting*60000);
+      steps.push({id: idx++, title:'Hvile', start:restStart, end:restEnd, desc:`Hvile i ${DURATIONS.resting} min.`});
+
+      return {steps};
+    }
+
+    function renderTimeline(tl){
+      let html = '<table><thead><tr><th>Steg</th><th>Start</th><th>Varighet</th><th>Mål / handling</th></tr></thead><tbody>';
+      for(const s of tl.steps){
+        const durMin = Math.round((s.end - s.start)/60000);
+        const durStr = durMin<=0? '—': durMin+' min';
+        html += `<tr><td>${s.id}</td><td>${fmtLocal(s.start)}</td><td>${durStr}</td><td><strong>${s.title}</strong><div class="small">${s.desc}</div></td></tr>`;
+      }
+      html += '</tbody></table>';
+      output.innerHTML = html;
+    }
+
+    function generateICS(tl){
+      const lines = [];
+      lines.push('BEGIN:VCALENDAR');
+      lines.push('VERSION:2.0');
+      lines.push('PRODID:-//Ribbeplanleggeren//NO');
+      for(const s of tl.steps){
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:' + Math.random().toString(36).substr(2,9) + '@ribbe.local');
+        lines.push('DTSTART:' + formatICSDate(s.start));
+        lines.push('DTEND:' + formatICSDate(s.end));
+        lines.push('SUMMARY:' + s.title);
+        lines.push('DESCRIPTION:' + s.desc);
+        lines.push('BEGIN:VALARM');
+        lines.push('TRIGGER:-PT0M');
+        lines.push('ACTION:DISPLAY');
+        lines.push('DESCRIPTION:' + s.desc);
+        lines.push('END:VALARM');
+        lines.push('BEGIN:VALARM');
+        lines.push('TRIGGER:-PT0M');
+        lines.push('ACTION:AUDIO');
+        lines.push('END:VALARM');
+        lines.push('END:VEVENT');
+      }
+      lines.push('END:VCALENDAR');
+      return lines.join('\r\n');
+    }
+
+    generateBtn.addEventListener('click', ()=>{
+      const val = el('completion').value;
+      if(!val){alert('Velg ferdig-tid.');return;}
+      const d = new Date(val);
+      lastCompletionDate = d;
+      const tl = buildTimeline(d);
+      renderTimeline(tl);
+      lastCalendarText = generateICS(tl);
+      downloadBtn.disabled = false;
+      copyBtn.disabled = false;
+    });
+
+    downloadBtn.addEventListener('click', ()=>{
+      if(!lastCalendarText) return;
+      const dateStr = lastCompletionDate.getFullYear()+pad(lastCompletionDate.getMonth()+1)+pad(lastCompletionDate.getDate())+'_'+pad(lastCompletionDate.getHours())+pad(lastCompletionDate.getMinutes());
+      const filename = `RibbePlanleggeren_${dateStr}.ics`;
+      const blob = new Blob([lastCalendarText], {type:'text/calendar;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    copyBtn.addEventListener('click', ()=>{
+      if(!lastCompletionDate) return;
+      const tl = buildTimeline(lastCompletionDate);
+      let txt = 'Ribbe tidslinje\n\n';
+      for(const s of tl.steps){txt += `${s.id}. ${fmtLocal(s.start)}: ${s.desc}\n`;}
+      navigator.clipboard.writeText(txt);
+    });
+
+    (function preset(){
+      const suggest = new Date(2025, 11, 24, 16, 0, 0, 0);
+      const formatted = suggest.getFullYear()+'-'+pad(suggest.getMonth()+1)+'-'+pad(suggest.getDate())+'T'+pad(suggest.getHours())+':'+pad(suggest.getMinutes());
+      el('completion').value = formatted;
+    })();
+  </script>
+</body>
+</html>
