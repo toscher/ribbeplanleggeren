@@ -1,4 +1,3 @@
-
 <html lang="no">
 <head>
   <meta charset="utf-8" />
@@ -6,96 +5,160 @@
   <title>Ribbeplanleggeren</title>
   <style>
     :root {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      color: #111;
-    }
-    body {
-      max-width: 900px;
-      margin: 28px auto;
-      padding: 20px;
-      background: linear-gradient(#b30000, #660000);
-      color: white;
-    }
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 6px;
-      color: #fff5e6;
-    }
-    p.lead {
-      color: #ffe6cc;
-      margin-top: 0;
-    }
-    label {
-      display: block;
-      margin-top: 14px;
-      font-weight: 600;
-    }
-    input[type=datetime-local] {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    button {
-      margin-top: 12px;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 0;
-      background: #006600;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 18px;
-      background: #fff5e6;
-      color: black;
-    }
-    th, td {
-      padding: 8px 10px;
-      border: 1px solid #e6e6e6;
-      text-align: left;
-    }
-    th {
-      background: #ffcccc;
-    }
-    .note {
-      font-size: 0.9rem;
-      color: #fff5e6;
-      margin-top: 12px;
-      background: #800000;
-      border-left: 4px solid #ffcccc;
-      padding: 10px;
-      border-radius: 6px;
-    }
-    .small {
-      font-size: 0.9rem;
-      color: #333;
-    }
-    .footer {
-      margin-top: 18px;
-      font-size: 0.85rem;
-      color: #ffe6cc;
-    }
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  color: #111;
+}
+
+body {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(#b30000, #660000);
+  color: white;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+  color: #fff5e6;
+}
+
+p.lead {
+  color: #ffe6cc;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin-top: 14px;
+  font-weight: 600;
+}
+
+input[type=datetime-local],
+select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+button {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 0;
+  background: #006600;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  max-width: 300px;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.controls button {
+  flex: 1;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+  background: #fff5e6;
+  color: black;
+  font-size: 0.95rem;
+  overflow-x: auto;
+  display: block;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #ffcccc;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: #fff5e6;
+  margin-top: 12px;
+  background: #800000;
+  border-left: 4px solid #ffcccc;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.small {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.footer {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: #ffe6cc;
+  text-align: center;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  body {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    text-align: center;
+  }
+
+  button {
+    font-size: 1rem;
+  }
+
+  th, td {
+    font-size: 0.85rem;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+}
   </style>
 </head>
 <body>
   <h1>🎄 Ribbeplanleggeren 🎄</h1>
-  <p class="lead"> Automatiser din planlegging av ribbesteking denne jula og la Ribbeplanleggeren gjør jobben. Angi når ribba skal være ferdig, så får du en tidslinje og kalenderfil med påminnelser for hvert steg.</p>
+  <p class="lead"> Automatiser din planlegging av ribbesteking denne jula og la Ribbeplanleggeren gjør jobben. Angi når ribba skal være ferdig, så får du en tidsplan og kalenderfil med påminnelser for hvert steg.</p>
   <p class="lead"> Er Ribbeplanleggeren nyttig for deg?  Ta gjerne kontakt med Ben! - <a href="mailto:bdt@fastmail.com"> bdt@fastmail.com</a> </p>
+
+  <label for="thickness">Tykkelse på ribba:</label>
+  <select id="thickness">
+    <option value="thin">Tynn (2–4 cm)</option>
+    <option value="standard" selected>Standard (5–7 cm)</option>
+    <option value="thick">Tykk (8–9 cm)</option>
+  </select>
 
   <label for="completion">Ønsket ferdig-tid (etter rind popping):</label>
   <input id="completion" type="datetime-local" />
 
   <div class="controls">
-    <button id="generate">Generer tidslinje</button>
+    <button id="generate">Generer tidsplanen din</button>
     <button id="download" disabled>Last ned .ics</button>
     <button id="copy" disabled>Kopier tabell som tekst</button>
   </div>
@@ -114,17 +177,22 @@
       prepHoursBeforeSteaming: 48*60,
       steaming: 45,
       slow: {
-        total: 6.5 * 60,
         parts: [
-          {label: '170°C, ingen vifte', minutes: 60, desc: 'Stek med svor ned, mål ca. 70°C kjernetemp.'},
-          {label: '90°C med vifte', minutes: 4*60, desc: 'Snu ribba svor opp, mål ca. 85°C kjernetemp.'},
-          {label: 'Skru opp til 110°C med vifte', minutes: 60, desc: 'Tilsett grønnsaker, mål ca. 85°C kjernetemp.'},
-          {label: 'Skru opp til 150°C med vifte', minutes: 30, desc: 'Mål ca. 90–92°C kjernetemp.'},
-          {label: 'Skru opp til 210°C med vifte', minutes: 0, desc: 'Følg med for å unngå sviing.'}
+          {label: '170°C, ingen vifte', minutes: 60, desc: 'Stek med svor ned, målet er ca. 70°C kjernetemp.'},
+          {label: '90°C med vifte', minutes: 240, desc: 'Snu ribba svor opp, målet er ca. 85°C kjernetemp.'}, // will override
+          {label: 'Skru opp til 110°C med vifte', minutes: 60, desc: 'Tilsett grønnsaker, målet er ca. 85°C kjernetemp.'},
+          {label: 'Skru opp til 150°C med vifte', minutes: 30, desc: 'Målet er ca. 90–92°C kjernetemp.'},
+          {label: 'Skru opp til 210°C med vifte', minutes: 15, desc: 'Følg med for å unngå sviing.'}
         ]
       },
       rindPopping: 5,
       resting: 10
+    };
+
+    const thicknessTimes = {
+      thin: 180,
+      standard: 240,
+      thick: 300
     };
 
     const el = id => document.getElementById(id);
@@ -140,6 +208,11 @@
     function formatICSDate(d){return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());}
 
     function buildTimeline(completionDate){
+      // update slow roast total depending on thickness
+      const thickness = el('thickness').value;
+      DURATIONS.slow.parts[1].minutes = thicknessTimes[thickness];
+      DURATIONS.slow.total = DURATIONS.slow.parts.reduce((a,p)=>a+p.minutes,0);
+
       const rindEnd = new Date(completionDate);
       const rindStart = new Date(rindEnd.getTime() - DURATIONS.rindPopping*60000);
       const slowRoastEnd = new Date(rindStart);
@@ -159,14 +232,18 @@
       const steps = [];
       steps.push({id:1, title:'Steg 1 — Forbered: salt/score (48 timer før damping)', start:prepTime, end:new Date(prepTime.getTime()+60000), desc:'Score svoren, gni med salt/pepper, kjøl 48 timer.'});
       steps.push({id:2, title:'Steg 2 — Damping / forbered i form', start:steamingStart, end:steamingEnd, desc:'Velg form med ~5 cm klaring. Kok 1.2 L vann med 1 ss salt og øs over svoren for å koagulere. Snu ribba svorside ned i vannet (unngå at den setter seg fast). Finhakk hvitløk og rosmarin og gni inn på kjøttsiden.'});
-        let idx = 3;
+      let idx = 3;
       for(const s of substeps){
         const end = new Date(s.start.getTime() + (s.duration||0)*60000);
         steps.push({id: idx++, title: `Steg ${idx-1} — ${s.label}`, start: s.start, end: end, desc: s.desc});
       }
 
-      steps.push({id: idx++, title:'Rind popping', start:rindStart, end:rindEnd, desc:'250°C i ca. 5 min til sprø svor.'});
-      const restStart = new Date(rindEnd);
+      // rind popping auto-adjusts based on last slow step
+      const lastSlowEnd = steps[steps.length-1].end;
+      const rindStartFixed = new Date(lastSlowEnd);
+      const rindEndFixed = new Date(rindStartFixed.getTime() + DURATIONS.rindPopping*60000);
+      steps.push({id: idx++, title:'Poff svoren!', start:rindStartFixed, end:rindEndFixed, desc:'250°C i ca. 5 min til sprø svor.'});
+      const restStart = new Date(rindEndFixed);
       const restEnd = new Date(restStart.getTime() + DURATIONS.resting*60000);
       steps.push({id: idx++, title:'Hvile', start:restStart, end:restEnd, desc:`Hvile i ${DURATIONS.resting} min.`});
 
