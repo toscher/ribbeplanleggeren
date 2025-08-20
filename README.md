@@ -1,5 +1,6 @@
 # ribbeplanleggeren
-🎄 Ribbeplanleggeren
+🎄 Ribbeplanleggeren 🎄
+
 Hver jul står jeg overfor det samme problemet:
 Jeg må skrive ut en tidsplan for ribbelaging – for hånd. 📝⏰
 Det er en slitsom og repetitiv øvelse, hvor jeg både må notere hva som skal gjøres og nøyaktig når det skal gjøres.
